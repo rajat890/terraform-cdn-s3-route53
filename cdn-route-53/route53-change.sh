@@ -2,9 +2,11 @@
 
 /bin/terraform show |grep cdn_domain|awk '{print$3}'|tr -d '"' > cdn_domain
 /bin/terraform show |grep s3_bucket_name_id|awk '{print$3}'|awk -F'"' '$0=$2' > route53_domain
+/bin/terraform show |grep cdn_id|awk '{print$3}'|tr -d '"' > cdn_id
 
 cdn_domain=`cat cdn_domain`
 route=`cat route53_domain`
+cdn_id=`cat cdn_id`
 
 echo ${cdn_domain}
 echo ${route}
@@ -34,3 +36,6 @@ EOF
 #this is the end point mapped with cdn
 echo "BELOW IS THE DNS MAPPED ROUTE"
 echo ${route}
+
+echo "BELOW IS THE CDN ID"
+echo ${cdn_id}
