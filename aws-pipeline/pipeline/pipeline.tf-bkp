@@ -35,39 +35,6 @@ resource "aws_iam_role_policy_attachment" "pipeline_policy_attachment" {
   policy_arn = aws_iam_policy.codepipeline_policy.arn
 }
 
-resource "aws_codebuild_project" "tfsec_build" {
-  name           = "tfsec-build"
-  description    = "tfsec scan for infrastructure build"
-  service_role   = aws_iam_role.codebuild_role.arn
-  build_timeout  = 60
-  queued_timeout = 480
-
-  source {
-    type                = "CODEPIPELINE"
-    buildspec           = "tfsec-buidspec.yml"
-    report_build_status = true
-  }
-
-  artifacts {
-    type = "CODEPIPELINE"
-  }
-
-  environment {
-    compute_type                = "BUILD_GENERAL1_SMALL"
-    image                       = "hashicorp/terraform:latest"
-    type                        = "LINUX_CONTAINER"
-    image_pull_credentials_type = "SERVICE_ROLE"
-  }
-
-  logs_config {
-    cloudwatch_logs {
-      status      = "ENABLED"
-      group_name  = "tfsec-build-logs"
-      stream_name = "tfsec-log"
-    }
-  }
-}
-
 resource "aws_codepipeline" "infra_pipeline" {
   name     = "infra-pipeline-terraform"
   role_arn = aws_iam_role.pipeline_role.arn
@@ -97,46 +64,26 @@ resource "aws_codepipeline" "infra_pipeline" {
     }
   }
 
+stage {
+  name = "ManualApproval"
+
+  action {
+    name            = "ManualApprovalAction"
+    category        = "Approval"
+    owner           = "AWS"
+    provider        = "Manual"
+    version         = "1"
+
+    configuration = {
+      NotificationArn     = "arn:aws:sns:us-east-1:955813879748:pipeline-approval-terraform"
+    }
+
+    run_order = 2
+  }
+}
+
   stage {
     name = "Build"
-
-    action {
-      name             = "tfsecbuild"
-      category         = "Build"
-      owner            = "AWS"
-      provider         = "CodeBuild"
-      version          = "1"
-      input_artifacts  = ["SourceOutput"]
-      output_artifacts = ["BuildOutput"]
-
-      configuration = {
-        ProjectName = "tfsec-build"
-      }
-
-      run_order = 2
-    }
-  }
-
-  stage {
-    name = "ManualApproval"
-
-    action {
-      name     = "ManualApprovalAction"
-      category = "Approval"
-      owner    = "AWS"
-      provider = "Manual"
-      version  = "1"
-
-      configuration = {
-        NotificationArn = "arn:aws:sns:us-east-1:226479769484:pipeline-approval"
-      }
-
-      run_order = 3
-    }
-  }
-
-  stage {
-    name = "InfraBuild"
 
     action {
       name             = "BuildAction"
@@ -145,15 +92,16 @@ resource "aws_codepipeline" "infra_pipeline" {
       provider         = "CodeBuild"
       version          = "1"
       input_artifacts  = ["SourceOutput"]
-      output_artifacts = ["InfraBuildOutput"]
+      output_artifacts = ["BuildOutput"]
 
       configuration = {
         ProjectName = "infra-build"
       }
 
-      run_order = 4
+      run_order = 3
     }
   }
+
 }
 
 resource "aws_codebuild_project" "infra_build" {
@@ -191,6 +139,7 @@ resource "aws_codebuild_project" "infra_build" {
   depends_on = [aws_s3_bucket.codepipeline_artifact_bucket]
 }
 
+
 resource "aws_iam_role" "codebuild_role" {
   name = "infra-codebuild-role"
 
@@ -218,7 +167,7 @@ data "aws_iam_policy_document" "codebuild_admin_policy" {
   }
 
   statement {
-    actions = [
+    actions   = [
       "s3:*",
       "logs:CreateLogGroup",
       "logs:CreateLogStream",
