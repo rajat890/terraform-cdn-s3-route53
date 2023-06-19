@@ -2,7 +2,7 @@ resource "aws_vpc" "tools_vpc" {
   cidr_block = var.vpc_cidr_block
 
   tags = {
-    Name           = "Tools"
+    Name           = var.vpc_name
     Classification = "Tools"
   }
 }
@@ -13,7 +13,7 @@ resource "aws_subnet" "public_subnet" {
   availability_zone       = "us-east-1a"
 
   tags = {
-    Name = "Public Subnet"
+    Name = "Public-Subnet-${var.vpc_name}"
   }
 }
 
@@ -23,7 +23,7 @@ resource "aws_subnet" "private_subnet1" {
   availability_zone       = "us-east-1a"
 
   tags = {
-    Name = "Private Subnet 1"
+    Name = "Private-Subnet-${var.vpc_name}"
   }
 }
 
@@ -33,7 +33,7 @@ resource "aws_subnet" "private_subnet2" {
   availability_zone       = "us-east-1b"
 
   tags = {
-    Name = "Private Subnet 2"
+    Name = "Private-Subnet-${var.vpc_name}"
   }
 }
 
@@ -41,7 +41,7 @@ resource "aws_internet_gateway" "igw" {
   vpc_id = aws_vpc.tools_vpc.id
 
   tags = {
-    Name = "Internet Gateway"
+    Name = "Internet-Gateway-${var.vpc_name}"
   }
 }
 
@@ -50,15 +50,15 @@ resource "aws_nat_gateway" "nat_gateway" {
   subnet_id     = aws_subnet.public_subnet.id
 
   tags = {
-    Name = "NAT Gateway"
+    Name = "NAT-Gateway-${var.vpc_name}"
   }
 }
 
 resource "aws_eip" "nat_eip" {
-  vpc = true
+  domain = "vpc"
 
   tags = {
-    Name = "NAT EIP"
+    Name = "NAT-EIP-${var.vpc_name}"
   }
 }
 
@@ -66,7 +66,7 @@ resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.tools_vpc.id
 
   tags = {
-    Name = "Public Route Table"
+    Name = "Public-RT-${var.vpc_name}"
   }
 }
 

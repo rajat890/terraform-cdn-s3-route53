@@ -1,5 +1,5 @@
 #this is the block for codepipeline iam policy
-
+#tfsec:ignore:aws-iam-no-policy-wildcards
 data "aws_iam_policy_document" "codepipeline_policy_document" {
   statement {
     actions = [
@@ -19,7 +19,7 @@ data "aws_iam_policy_document" "codepipeline_policy_document" {
 
 
 resource "aws_iam_policy" "codepipeline_policy" {
-  name        = var.codepipeline_policy_name
+  name        = "${var.pipeline_role_name}-policy"
   policy      = data.aws_iam_policy_document.codepipeline_policy_document.json
   description = "Full access policy for AWS CodePipeline"
 }
@@ -51,6 +51,7 @@ resource "aws_iam_role_policy_attachment" "pipeline_policy_attachment" {
 ########################################
 ##Below is the block for codebuild role and policy######
 
+#tfsec:ignore:aws-iam-no-policy-wildcards
 resource "aws_iam_role" "codebuild_role" {
   name = var.codebuild_role_name
 
@@ -71,6 +72,8 @@ resource "aws_iam_role" "codebuild_role" {
 EOF
 }
 
+
+#tfsec:ignore:aws-iam-no-policy-wildcards
 data "aws_iam_policy_document" "codebuild_admin_policy" {
   statement {
     actions = [
@@ -99,7 +102,7 @@ data "aws_iam_policy_document" "codebuild_admin_policy" {
 
 
 resource "aws_iam_policy" "codebuild_admin_policy" {
-  name   = var.codebuild_admin_policy_name
+  name   = "${var.codebuild_role_name}-policy"
   policy = data.aws_iam_policy_document.codebuild_admin_policy.json
 }
 

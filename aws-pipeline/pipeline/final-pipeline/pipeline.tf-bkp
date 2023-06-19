@@ -3,7 +3,7 @@ resource "aws_codepipeline" "infra_pipeline" {
   role_arn = aws_iam_role.pipeline_role.arn
 
   artifact_store {
-    location = "pipelines-artifacts-terraform-new"
+    location = "terraform-pipeline-bucket-final"
     type     = "S3"
   }
 
@@ -16,7 +16,7 @@ resource "aws_codepipeline" "infra_pipeline" {
       owner            = "AWS"
       provider         = "CodeCommit"
       version          = "1"
-      output_artifacts = [var.source_output_artifact]
+      output_artifacts = ["${var.source_stage_name}-artifact"]
 
       configuration = {
         RepositoryName = var.repository_name
@@ -56,6 +56,10 @@ resource "aws_codepipeline" "infra_pipeline" {
       owner    = "AWS"
       provider = "Manual"
       version  = "1"
+
+      # configuration = {
+      #   NotificationArn = var.notification_arn
+      # } 
 
       run_order = 3
     }
@@ -101,4 +105,3 @@ resource "aws_codepipeline" "infra_pipeline" {
     }
   }
 }
-

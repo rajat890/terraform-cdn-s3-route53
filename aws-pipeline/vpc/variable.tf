@@ -1,3 +1,13 @@
+variable "vpc_name" {
+  description = "Name of the VPC"
+  default = "terraform-defaut"
+}
+
+#variable "vpc_classification" {
+#  description = "Classification of the VPC"
+#  default  = "default-class"
+#}
+
 variable "vpc_cidr_block" {
   description = "CIDR block for the VPC"
   type        = string

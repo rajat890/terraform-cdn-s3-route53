@@ -25,8 +25,8 @@ resource "aws_codebuild_project" "tfsec_build" {
   logs_config {
     cloudwatch_logs {
       status      = "ENABLED"
-      group_name  = var.tfsec_build_group_name
-      stream_name = var.tfsec_build_stream_name
+      group_name  = "${var.tfsec_build_name}-log-group"
+      stream_name = "${var.tfsec_build_name}-stream"
     }
   }
 }
@@ -58,8 +58,8 @@ resource "aws_codebuild_project" "infra_build" {
   logs_config {
     cloudwatch_logs {
       status      = "ENABLED"
-      group_name  = var.infra_build_group_name
-      stream_name = var.infra_build_stream_name
+      group_name  = "${var.infra_build_name}-log-group"
+      stream_name = "${var.infra_build_name}-stream"
     }
   }
 }
@@ -91,8 +91,8 @@ resource "aws_codebuild_project" "destroy_build" {
   logs_config {
     cloudwatch_logs {
       status      = "ENABLED"
-      group_name  = var.destroy_build_group_name
-      stream_name = var.destroy_build_stream_name
+      group_name  = "${var.destroy_build_name}-log-group"
+      stream_name = "${var.destroy_build_name}-stream"
     }
   }
 }

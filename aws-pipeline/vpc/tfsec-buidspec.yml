@@ -1,0 +1,20 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo " Installing tfscan"
+      - apk update
+      - apk add curl
+      - curl -L https://github.com/aquasecurity/tfsec/releases/latest/download/tfsec-linux-amd64 -o tfsec
+      - chmod +x tfsec
+      - mv tfsec /usr/local/bin/tfsec
+      - tfsec --version
+  build:
+    commands:
+      - echo "Executing tfscanning of file and validation"
+      - terraform init
+      - ls -lrth
+      - terraform validate
+      - terraform plan
+      - tfsec .
