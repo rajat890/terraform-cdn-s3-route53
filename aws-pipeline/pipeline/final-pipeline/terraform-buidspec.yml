@@ -1,0 +1,12 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Executing terraform init..."
+      - terraform init
+  build:
+    commands:
+      - echo "Executing terraform validate..."
+      - ls -lrth
+      - terraform apply -auto-approve -var-file="variables.tfvars"

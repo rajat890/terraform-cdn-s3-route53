@@ -1,0 +1,14 @@
+version: 0.2
+
+env:
+  parameter-store:
+    DESTROY_INFRA: "/CodeBuild/DESTROY_INFRA"
+
+phases:
+  build:
+    commands:
+      - echo "DESTROY_INFRA value:${DESTROY_INFRA}"
+      - terraform init
+      - terraform validate
+      - ls -lrth 
+      - if [[ "$DESTROY_INFRA" == "true" ]]; then terraform destroy -auto-approve -var-file="variables.tfvars"; else echo "Infrastructure destruction not requested."; fi
